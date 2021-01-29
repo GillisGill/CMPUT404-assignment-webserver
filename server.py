@@ -57,6 +57,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         file_name = string_file1[1::]
         #print("+"+file_name+"+")
         last_index = len(file_name) - 1
+        
         # Check for / at the end
         if last_index > 0 and file_name[last_index] == "/":
             file_name = file_name[0:last_index]
@@ -75,7 +76,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
         #print("INDEX IS HERE:", i)
         """
         # Make path and file name
-        file_name =  "./www/"+file_name
+        print("FL1"+file_name)
+        if file_name == "":
+            file_name = "./www"+file_name
+        else:
+            file_name = "./www/"+file_name
+
         path_files = file_name.rsplit('/', 1)
         if path_files[0] == "./www":
             path_files[0] = "./www'"
@@ -116,7 +122,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if i > -1:
             if string_check.find(".css") > -1:
                 print("in css")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n",'utf-8'))
+                print("FILE NAME"+file_name+"<<<<<<<<<<<<<<<<<<<")
+                the_file = open(file_name,'r')
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n" + the_file.read(),'utf-8'))
+                the_file.close()
             elif string_check.find(".html") > -1:
                 print("in html")
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
@@ -132,7 +141,15 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: "+location_string+"\r\nContent-Type: text/html\r\n",'utf-8'))
                 else:
                     print("in root")
-                    self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
+                    #file_name is the variable you'd want to use
+                    print("FILE NAME"+file_name+"/index.html")
+                    to_open = file_name+"/index.html"
+                    the_file = open(to_open,'r')
+                    #the_file2 = open("./www/deep/deep.css",'r')
+                    #the_file2.read()
+                    self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n" + the_file.read(),'utf-8'))
+                    the_file.close()
+
 
         
                 #print("CHECK HERE:"+string_check[1]+":")
