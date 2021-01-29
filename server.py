@@ -49,7 +49,15 @@ class MyWebServer(socketserver.BaseRequestHandler):
         
         #print("this is string_file"+string_file+"nospace")
         #print("this is string check"+string_check)
+        print("+"+file_name+"+")
+        last_index = len(file_name) - 1
+        # Check for / at the end
+        if last_index > 0 and file_name[last_index] == "/":
+            file_name = file_name[0:last_index]
+            print(file_name)
+
         
+        """
         i = -1
         for files in os.walk("."):
             x = str(files)
@@ -59,6 +67,28 @@ class MyWebServer(socketserver.BaseRequestHandler):
             #print(files)
             #print(index)
         #print("INDEX IS HERE:", i)
+        """
+        # Make path
+        file_name =  "./www/"+file_name
+        path_files = file_name.rsplit('/', 1)
+        if path_files[0] == "./www":
+            path_files[0] = "./www'"
+        if path_files[1] != "":
+            path_files[1] = "'"+path_files[1]+"'"
+
+        i = -1
+        for files in os.walk("."):
+            x = str(files)
+            index_list = []
+            print(x)
+            for pathfile in path_files:
+                index_app = x.find(pathfile)
+                index_list.append(index_app)
+            print(index_list)
+            print(path_files)
+            if -1 not in index_list:
+                i = 1
+
 
         
         """
@@ -83,9 +113,9 @@ class MyWebServer(socketserver.BaseRequestHandler):
             elif string_check.find(".html") > -1:
                 print("in html")
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
-            else:
+            elif string_check.find(".") == -1:
                 print("in root")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
         else:
             print("in 404")
             self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
