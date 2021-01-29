@@ -35,53 +35,39 @@ class MyWebServer(socketserver.BaseRequestHandler):
         
         stringGET = str(self.data)
 
-        #print(stringGET)
-        #print("\n")
-        #print(stringGET)
+        # Find indexes in request
         index_cut = stringGET.find("HTTP/") 
         index_start = stringGET.find("/") - 1
-        #print("start:",index_start,"end:",index_cut,"\n")
+
+        # Check for illegal method
         index_method = stringGET.find(" ")
         string_method = stringGET[0:index_method:1]
-        #print("METHOD:"+string_method)
-
-
         if string_method.find("PUT") != -1:
             self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+        elif string_method.find("POST") != -1:
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+        elif string_method.find("DELETE") != -1:
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
 
-
-
+        # Index String
         string_check = stringGET[index_start:index_cut:1]
-        
         string_file1 = string_check.strip()
         file_name = string_file1[1::]
-        #print("+"+file_name+"+")
+
         last_index = len(file_name) - 1
-        
+
         # Check for / at the end
         if last_index > 0 and file_name[last_index] == "/":
             file_name = file_name[0:last_index]
-            print(file_name)
 
         
-        """
-        i = -1
-        for files in os.walk("."):
-            x = str(files)
-            index = x.find(file_name)
-            if index > -1:
-                i = index
-            #print(files)
-            #print(index)
-        #print("INDEX IS HERE:", i)
-        """
-        # Make path and file name
-        print("FL1"+file_name)
+        # append www to path
         if file_name == "":
             file_name = "./www"+file_name
         else:
             file_name = "./www/"+file_name
 
+        # split into path and file and fix
         path_files = file_name.rsplit('/', 1)
         if path_files[0] == "./www":
             path_files[0] = "./www'"
@@ -93,75 +79,40 @@ class MyWebServer(socketserver.BaseRequestHandler):
         for files in os.walk("."):
             x = str(files)
             index_list = []
-            #print(x)
             for pathfile in path_files:
                 index_app = x.find(pathfile)
                 index_list.append(index_app)
-            #print(index_list)
-            #print(path_files)
             if -1 not in index_list:
                 i = 1
 
-
-        
-        """
-        if i > -1:
-            if string_check.find("/base.css") > 0:
-                print("in css")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n",'utf-8'))
-            elif string_check.find("/index.html") > 0:
-                print("in html")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
-            elif string_check.find("/") > 0:
-                print("In root test")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
-        elif i == -1:
-            print("IN 404")
-            self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
-        """
+        # If file exists in ./www apply appropriate mime-type, else 404 not found
         if i > -1:
             if string_check.find(".css") > -1:
-                print("in css")
-                print("FILE NAME"+file_name+"<<<<<<<<<<<<<<<<<<<")
                 the_file = open(file_name,'r')
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n" + the_file.read(),'utf-8'))
                 the_file.close()
+
             elif string_check.find(".html") > -1:
-                print("in html")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
+                the_file = open(file_name,'r')
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n" + the_file.read(),'utf-8'))
+                the_file.close()
+
             elif string_check.find(".") == -1:
                 slash_index = len(string_check) - 2 #account for space
+                # Redirect for that of /
                 if string_check[slash_index] != "/":
                     append_url = string_check.strip()
-                    #location_string = "http://"+str(HOST)+":"+str(PORT)+""+append_url+"/"
                     location_string = "http://127.0.0.1:8080"+append_url+"/"
-                    print("THIS IS APPEND URL:"+append_url)
-                    print("THIS IS FULL URL"+location_string+"<<<<<")
-                    #self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: http://127.0.0.1:8080/deep/\r\nContent-Type: text/html\r\n",'utf-8'))
                     self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: "+location_string+"\r\nContent-Type: text/html\r\n",'utf-8'))
+
                 else:
-                    print("in root")
-                    #file_name is the variable you'd want to use
-                    print("FILE NAME"+file_name+"/index.html")
                     to_open = file_name+"/index.html"
                     the_file = open(to_open,'r')
-                    #the_file2 = open("./www/deep/deep.css",'r')
-                    #the_file2.read()
                     self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n" + the_file.read(),'utf-8'))
                     the_file.close()
 
-
-        
-                #print("CHECK HERE:"+string_check[1]+":")
-                #print("in root")
         else:
-            print("in 404")
             self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
-            #self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n",'utf-8'))
-
-
-            
-        
 
 
        
