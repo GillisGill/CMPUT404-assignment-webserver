@@ -80,12 +80,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
         for files in os.walk("."):
             x = str(files)
             index_list = []
-            print(x)
+            #print(x)
             for pathfile in path_files:
                 index_app = x.find(pathfile)
                 index_list.append(index_app)
-            print(index_list)
-            print(path_files)
+            #print(index_list)
+            #print(path_files)
             if -1 not in index_list:
                 i = 1
 
@@ -114,8 +114,21 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 print("in html")
                 self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
             elif string_check.find(".") == -1:
-                print("in root")
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
+                slash_index = len(string_check) - 2 #account for space
+                if string_check[slash_index] != "/":
+                    append_url = string_check.strip()
+                    #location_string = "http://"+str(HOST)+":"+str(PORT)+""+append_url+"/"
+                    location_string = "http://127.0.0.1:8080"+append_url+"/"
+                    print("THIS IS APPEND URL:"+append_url)
+                    print("THIS IS FULL URL"+location_string+"<<<<<")
+                    #self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: http://127.0.0.1:8080/deep/\r\nContent-Type: text/html\r\n",'utf-8'))
+                    self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: "+location_string+"\r\nContent-Type: text/html\r\n",'utf-8'))
+                else:
+                    self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
+
+        
+                #print("CHECK HERE:"+string_check[1]+":")
+                #print("in root")
         else:
             print("in 404")
             self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
