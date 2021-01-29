@@ -34,22 +34,28 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print ("Got a request of: %s\n" % self.data)
         
         stringGET = str(self.data)
+
         #print(stringGET)
         #print("\n")
         #print(stringGET)
         index_cut = stringGET.find("HTTP/") 
         index_start = stringGET.find("/") - 1
         #print("start:",index_start,"end:",index_cut,"\n")
+        index_method = stringGET.find(" ")
+        string_method = stringGET[0:index_method:1]
+        #print("METHOD:"+string_method)
+
+
+        if string_method.find("PUT") != -1:
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+
+
+
         string_check = stringGET[index_start:index_cut:1]
         
         string_file1 = string_check.strip()
         file_name = string_file1[1::]
-        #print("THIS IS STRING FILE"+string_file)
-        
-        
-        #print("this is string_file"+string_file+"nospace")
-        #print("this is string check"+string_check)
-        print("+"+file_name+"+")
+        #print("+"+file_name+"+")
         last_index = len(file_name) - 1
         # Check for / at the end
         if last_index > 0 and file_name[last_index] == "/":
@@ -68,7 +74,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             #print(index)
         #print("INDEX IS HERE:", i)
         """
-        # Make path
+        # Make path and file name
         file_name =  "./www/"+file_name
         path_files = file_name.rsplit('/', 1)
         if path_files[0] == "./www":
@@ -76,6 +82,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if path_files[1] != "":
             path_files[1] = "'"+path_files[1]+"'"
 
+        # Check if file exists in provided path
         i = -1
         for files in os.walk("."):
             x = str(files)
@@ -124,6 +131,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     #self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: http://127.0.0.1:8080/deep/\r\nContent-Type: text/html\r\n",'utf-8'))
                     self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: "+location_string+"\r\nContent-Type: text/html\r\n",'utf-8'))
                 else:
+                    print("in root")
                     self.request.sendall(bytearray("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n",'utf-8'))
 
         
